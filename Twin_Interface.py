@@ -194,7 +194,7 @@ def H(e):
     return 0.5*( 1 + ((exp(2*((e)/l)) - 1)/(exp(2*((e)/l))+1)) )
 
 def G_nucleation(p, u):
-    G0 = 1e4 # Modify this to increase the strength of the nucleation driving force term G
+    G0 = 1e5 # Modify this to increase the strength of the nucleation driving force term G
     # max Eigenvalue for E1
     E100, E101, E110, E111 = E1[0,0], E1[0,1], E1[1,0], E1[1,1]
     print(E1[0,0],'E1[0,0]')
@@ -409,8 +409,10 @@ prm2["newton_solver"]["maximum_iterations"] = 100
 
 # Phi equation
 grad_p = project(grad(pnew), W)
-grad_p_inner  = inner(grad_p, grad_p)*dx 
-grad_p_norm = sqrt(assemble(grad_p_inner)) 
+#grad_p_inner  = inner(grad_p, grad_p)*dx #global
+#grad_p_norm = sqrt(assemble(grad_p_inner)) #global
+grad_p_inner  = dot(grad_p, grad_p) #local
+grad_p_norm = sqrt(grad_p_inner) #local
 P = (-inner(pnew, q) + inner(pold, q) + dt*(grad_p_norm*v_hat(fnew)*q + G_nucleation(pnew, unew)*q))*dx 
 J_p = derivative(P, pnew, p)
 problem_phi = NonlinearVariationalProblem(P, pnew, bc_phi, J_p)
